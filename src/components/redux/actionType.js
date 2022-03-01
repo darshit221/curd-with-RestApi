@@ -1,0 +1,4 @@
+
+const GET_PASSANGER="GET_PASSANGER"
+
+export {GET_PASSANGER}
