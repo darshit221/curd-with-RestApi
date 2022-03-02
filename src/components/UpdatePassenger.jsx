@@ -13,22 +13,31 @@ import { Box } from "@mui/system";
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { useDispatch } from "react-redux";
-import { useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { fetchSeclcteddata, updatePassanger } from "./redux/actionCreation";
 
 function UpdatePassenger() {
   const { id } = useParams();
   const dispatch = useDispatch();
-  const { airline, selecteData } = useSelector((state) => state);
-  const [updateData, setupdateData] = useState({
-    name: `${selecteData && selecteData.name}`,
-    trips: `${selecteData?.trips}`,
-    airline: `${selecteData.airline && selecteData.airline[0].id}`,
-  });
+  const { airline } = useSelector((state) => state);
+  const { selecteData } = useSelector((state) => state);
+  const [updateData, setupdateData] = useState({});
+  const navigate = useNavigate();
+  const data = {
+    name: selecteData.name,
+    trips: selecteData.trips,
+    airline: selecteData.airline && selecteData.airline[0].id,
+  };
 
   useEffect(() => {
     dispatch(fetchSeclcteddata(id));
-  }, []);
+  }, [dispatch, id]);
+
+  useEffect(() => {
+    if (selecteData) {
+      setupdateData({ ...data });
+    }
+  }, [selecteData]);
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -37,15 +46,13 @@ function UpdatePassenger() {
       [name]: value,
     });
   };
-  const navigate = useNavigate();
   const handleSubmit = (e) => {
-    navigate("/");
-    updatePassanger(updateData, id);
-    setupdateData({});
     e.preventDefault();
+    dispatch(updatePassanger(id, updateData));
+    navigate("/");
   };
   return (
-    <Container sx={{ m: 3, p: 3 }}>
+    <Container sx={{ m: "auto", p: 3 }}>
       <Typography
         variant="h4"
         sx={{ backgroundColor: "#1976d2", color: "white" }}
@@ -62,7 +69,7 @@ function UpdatePassenger() {
               label="Name"
               name="name"
               type="text"
-              value={updateData.name}
+              value={updateData.name || " "}
               variant="outlined"
               onChange={handleChange}
             />
@@ -72,7 +79,7 @@ function UpdatePassenger() {
               name="trips"
               id="outlined-basic"
               label="Trips"
-              value={updateData.trips}
+              value={updateData.trips || " "}
               variant="outlined"
               onChange={handleChange}
             />
@@ -84,7 +91,7 @@ function UpdatePassenger() {
                 labelId="demo-simple-select-helper-label"
                 id="demo-simple-select-helper"
                 name="airline"
-                value={updateData.airline}
+                value={updateData.airline || ""}
                 label="Airline"
                 onChange={handleChange}
               >
@@ -100,6 +107,14 @@ function UpdatePassenger() {
           </Box>
         </Paper>
         <Box sx={{ textAlign: "right", m: 2 }}>
+          <Link to="/">
+            <Button
+              variant="outlined"
+              sx={{ color: "red", borderColor: "red", margin: 2 }}
+            >
+              Exit
+            </Button>
+          </Link>
           <Button type="submit" variant="contained" onClick={handleSubmit}>
             Update Passenger
           </Button>

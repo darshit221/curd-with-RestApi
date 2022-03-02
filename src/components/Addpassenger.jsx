@@ -8,7 +8,7 @@ import {
 } from "@mui/material";
 import React, { useState } from "react";
 import { useDispatch } from "react-redux";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { addPassanger } from "./redux/actionCreation";
 
 function Addpassenger() {
@@ -80,6 +80,14 @@ function Addpassenger() {
           </Box>
         </Paper>
         <Box sx={{ textAlign: "right", m: 2 }}>
+          <Link to="/">
+            <Button
+              variant="outlined"
+              sx={{ color: "red", borderColor: "red", margin: 2 }}
+            >
+              Exit
+            </Button>
+          </Link>
           <Button type="submit" variant="contained">
             Add New Passenger
           </Button>

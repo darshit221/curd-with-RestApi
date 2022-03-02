@@ -1,7 +1,12 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { useSelector } from "react-redux";
-import { fetchAirline, fetchPassanger } from "./redux/actionCreation";
+import {
+  deletePassanger,
+  fetchAirline,
+  fetchAllPassanger,
+  fetchPassanger,
+} from "./redux/actionCreation";
 import { styled } from "@mui/material/styles";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
@@ -13,6 +18,10 @@ import Paper from "@mui/material/Paper";
 import { Button, Container } from "@mui/material";
 import { Link } from "react-router-dom";
 import { Box } from "@mui/system";
+import Pagination from "@mui/material/Pagination";
+import Stack from "@mui/material/Stack";
+import queryString from "query-string";
+import { confirm } from "react-confirm-box";
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
   [`&.${tableCellClasses.head}`]: {
@@ -28,23 +37,45 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
   "&:nth-of-type(odd)": {
     backgroundColor: theme.palette.action.hover,
   },
-  // hide last border
+
   "&:last-child td, &:last-child th": {
     border: 0,
   },
 }));
 
 function Home() {
-  const dispatch = useDispatch();
+  const { allPassenger } = useSelector((state) => state);
   const { passanger } = useSelector((state) => state);
+  const [page, setPage] = useState(1);
+
+  const dispatch = useDispatch();
+  const parsed = { page: page, size: 10 };
+  const stringified = queryString.stringify(parsed);
 
   useEffect(() => {
-    dispatch(fetchPassanger());
+    dispatch(fetchPassanger(stringified));
+  }, [parsed.page, dispatch]);
+  useEffect(() => {
+    dispatch(fetchAllPassanger());
+  }, []);
+  useEffect(() => {
     dispatch(fetchAirline());
   }, []);
 
+  const PagginationHandler = (e) => {
+    setPage(e.target.textContent);
+  };
+
+  const deleteHandler = async (_id) => {
+    const result = await confirm("Are you sure?");
+    if (result) {
+      dispatch(deletePassanger(_id));
+      return;
+    }
+  };
+  const count = Math.floor(allPassenger.length / 10);
+
   return (
-    // <div>hello</div>
     <Container>
       <Box sx={{ textAlign: "right", m: 2 }}>
         <Link to="/addpassenger">
@@ -82,7 +113,13 @@ function Home() {
                     </Link>
                   </StyledTableCell>
                   <StyledTableCell align="left">
-                    <Button variant="contained">delete</Button>
+                    <Button
+                      onClick={() => deleteHandler(_id)}
+                      variant="outlined"
+                      sx={{ color: "red", borderColor: "red" }}
+                    >
+                      delete
+                    </Button>
                   </StyledTableCell>
                 </StyledTableRow>
               );
@@ -90,6 +127,14 @@ function Home() {
           </TableBody>
         </Table>
       </TableContainer>
+
+      <Stack spacing={2} sx={{ margin: "10px " }}>
+        <Pagination
+          onChange={(e) => PagginationHandler(e)}
+          count={count}
+          color="primary"
+        />
+      </Stack>
     </Container>
   );
 }
